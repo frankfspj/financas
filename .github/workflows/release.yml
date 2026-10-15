@@ -29,7 +29,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          descricao=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
+          descricao=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME" | grep -v '^Co-Authored-By:')
           {
             echo "## O que mudou"
             echo
