@@ -1,0 +1,47 @@
+# Quando uma tag de versão (ex.: v1.1.0) é enviada ao GitHub, monta o
+# financas.zip (só o necessário para usar) e publica como uma Release.
+# Link fixo para a versão mais recente:
+# https://github.com/frankfspj/financas/releases/latest/download/financas.zip
+name: Publicar versão para download
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Montar o financas.zip
+        run: |
+          mkdir -p dist/financas
+          cp -r index.html css js LEIA-ME.txt dist/financas/
+          cd dist && zip -r financas.zip financas
+
+      - name: Criar a Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          descricao=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
+          {
+            echo "## O que mudou"
+            echo
+            echo "$descricao"
+            echo
+            echo "## Como usar"
+            echo
+            echo "1. Baixe o **financas.zip** abaixo e extraia a pasta."
+            echo "2. Dê dois cliques em \`index.html\` — ele abre no navegador."
+            echo
+            echo "Já usa uma versão anterior? Faça um backup antes, extraia a nova versão no mesmo lugar e, se precisar, importe o backup."
+          } > notas.md
+          gh release create "$GITHUB_REF_NAME" dist/financas.zip \
+            --title "Finanças $GITHUB_REF_NAME" \
+            --notes-file notas.md

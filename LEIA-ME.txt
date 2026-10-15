@@ -1,0 +1,37 @@
+FINANÇAS — controle financeiro pessoal
+=======================================
+
+COMO COMEÇAR
+1. Extraia esta pasta (botão direito no .zip -> "Extrair tudo").
+   Coloque a pasta em um lugar fixo, por exemplo em Documentos.
+2. Abra a pasta e dê dois cliques no arquivo  index.html
+   Ele abre no seu navegador (Chrome, Edge, Firefox...). Pronto!
+
+Dica: depois de abrir, salve a página nos favoritos do navegador
+ou crie um atalho do index.html na Área de Trabalho.
+
+Não precisa de internet nem de instalar nada.
+Dentro do site, clique no botão azul "Ajuda" para ver como usar cada função.
+
+
+SEUS DADOS
+- Tudo fica salvo só no navegador deste computador. Nada é enviado para a internet.
+- Se você limpar os dados do navegador, trocar de navegador ou de computador,
+  os dados NÃO vão junto. Por isso, faça backup:
+  ícone de banco de dados (no topo da página) -> "Exportar backup".
+  Guarde o arquivo .json em um lugar seguro (Google Drive, e-mail, pen drive).
+
+
+COMO ATUALIZAR PARA UMA VERSÃO NOVA
+1. Na versão atual, faça um backup (Exportar backup).
+2. Baixe o financas.zip novo:
+   https://github.com/frankfspj/financas/releases/latest/download/financas.zip
+3. Extraia NO MESMO LUGAR, substituindo a pasta antiga.
+4. Abra o index.html. Se os dados não aparecerem, use "Importar backup".
+
+A versão que você está usando aparece no rodapé da página.
+
+
+Também dá para usar sem baixar nada, pelo link:
+https://frankfspj.github.io/financas/
+(o link e a versão baixada guardam dados separados)

@@ -25,16 +25,29 @@ Controle financeiro pessoal simples, bonito e privado. Informe o saldo do mês, 
 
 ## Como usar
 
-### Pelo navegador (recomendado)
+Escolha um dos dois jeitos — nenhum precisa de instalação nem de conta.
 
-Acesse **https://frankfspj.github.io/financas/** — não precisa instalar nada. Na dúvida, clique em **Ajuda** no topo da página.
+### 1. Pelo link (mais fácil)
 
-### Localmente
+Acesse **https://frankfspj.github.io/financas/** e comece a usar. Na dúvida, clique em **Ajuda** no topo da página.
 
-1. Baixe o projeto: botão **Code → Download ZIP** (ou `git clone https://github.com/frankfspj/financas.git`).
-2. Extraia a pasta e abra o arquivo `index.html` no navegador.
+### 2. Baixar para o computador (funciona sem internet)
 
-> O gráfico (Chart.js) e as fontes são carregados da internet. Sem conexão o site continua funcionando, mas sem os gráficos.
+1. **[⬇ Baixar o Finanças (financas.zip)](https://github.com/frankfspj/financas/releases/latest/download/financas.zip)**
+2. Clique com o botão direito no arquivo baixado → **Extrair tudo**. Deixe a pasta em um lugar fixo, como *Documentos*.
+3. Abra a pasta e dê **dois cliques em `index.html`** — ele abre no seu navegador.
+
+O ZIP traz só o necessário (`index.html`, `css/`, `js/` e um `LEIA-ME.txt`). Para ver o histórico de versões, acesse a página de [Releases](https://github.com/frankfspj/financas/releases).
+
+> **Atenção:** o link e a versão baixada guardam dados **separados**. Escolha um jeito e fique com ele, ou use o backup para levar os dados de um para o outro.
+
+#### Atualizar a versão baixada
+
+1. Na versão que você já usa, faça um **backup** (ícone de banco de dados → *Exportar backup*).
+2. Baixe o `financas.zip` novo pelo mesmo link acima e extraia **no mesmo lugar**, substituindo a pasta antiga.
+3. Abra o `index.html`. Se os dados não aparecerem, use *Importar backup*.
+
+A versão em uso aparece no rodapé da página.
 
 ## Seus dados
 
@@ -47,10 +60,31 @@ Acesse **https://frankfspj.github.io/financas/** — não precisa instalar nada.
 
 ```
 financas/
-├── index.html      # estrutura da página e janelas (modais)
-├── css/style.css   # visual, temas claro e escuro
-├── js/app.js       # lógica, cálculos, gráficos e armazenamento
-└── docs/           # imagens deste README
+├── index.html          # estrutura da página e janelas (modais)
+├── css/style.css       # visual, temas claro e escuro
+├── js/app.js           # lógica, cálculos, gráficos e armazenamento
+├── js/vendor/          # Chart.js (incluído, para funcionar sem internet)
+├── LEIA-ME.txt         # instruções que vão dentro do ZIP
+├── publicar.sh         # publica atualizações (site e/ou ZIP)
+├── .github/workflows/  # monta o financas.zip automaticamente
+└── docs/               # imagens deste README
 ```
 
-Feito com HTML, CSS e JavaScript puros, mais [Chart.js](https://www.chartjs.org/) para os gráficos. Não há etapa de build: basta editar os arquivos e recarregar a página.
+Feito com HTML, CSS e JavaScript puros, mais [Chart.js](https://www.chartjs.org/) (licença MIT) para os gráficos. Não há etapa de build: basta editar os arquivos e recarregar a página.
+
+## Publicando atualizações (para o mantenedor)
+
+1. Edite os arquivos e teste abrindo o `index.html` no navegador.
+2. Publique com o script:
+
+   ```bash
+   # só atualiza o site (GitHub Pages)
+   ./publicar.sh "Descrição da mudança"
+
+   # atualiza o site E lança uma versão nova para download
+   ./publicar.sh "Descrição da mudança" 1.1.0
+   ```
+
+- O site se atualiza sozinho cerca de 1 minuto depois do envio.
+- Ao informar uma versão, o script atualiza o número no rodapé, cria a tag `v1.1.0` e o GitHub monta o `financas.zip` em uma nova [Release](https://github.com/frankfspj/financas/releases). O link de download sempre aponta para a mais recente.
+- Use versões crescentes: `1.0.1` para correções, `1.1.0` para funções novas, `2.0.0` para mudanças grandes.
