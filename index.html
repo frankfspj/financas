@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finanças</title>
+  <meta name="description" content="Controle seus gastos mensais por categoria, com dashboard, histórico, metas de economia e resumo do mês.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Aplica o tema antes da página aparecer, evitando "piscar" em branco
+    (function () {
+      var t;
+      try { t = localStorage.getItem('financas.tema'); } catch (e) {}
+      if (t !== 'dark' && t !== 'light') {
+        t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span>Finanças</span>
+      </div>
+
+      <nav class="tabs" aria-label="Seções">
+        <button class="tab is-active" data-view="dashboard" type="button">Dashboard</button>
+        <button class="tab" data-view="resumo" type="button">Resumo</button>
+        <button class="tab" data-view="historico" type="button">Histórico</button>
+        <button class="tab" data-view="metas" type="button">Metas</button>
+      </nav>
+
+      <div class="topbar__right">
+        <div class="month-picker">
+          <button class="icon-btn" id="prevMonth" type="button" aria-label="Mês anterior">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span id="monthLabel" class="month-picker__label">—</span>
+          <button class="icon-btn" id="nextMonth" type="button" aria-label="Próximo mês">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <button class="icon-btn icon-btn--ring" id="openBackup" type="button" aria-label="Backup dos dados" title="Backup dos dados">
+          <svg viewBox="0 0 24 24" width="18" height="18"><ellipse cx="12" cy="6" rx="7" ry="2.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 6v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6M5 12v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span class="badge-dot" id="backupDot" hidden></span>
+        </button>
+        <button class="icon-btn icon-btn--ring theme-toggle" id="themeToggle" type="button" aria-label="Ativar modo escuro">
+          <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="view-dashboard" class="view is-active">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Visão geral</p>
+          <h1>Seu mês em números</h1>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--save" id="openSave" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 10c0-3.3-3.1-6-7-6S5 6.7 5 10c0 1.9 1 3.6 2.6 4.7V18a1 1 0 0 0 1 1h1.6a1 1 0 0 0 1-1v-1h1.6v1a1 1 0 0 0 1 1h1.6a1 1 0 0 0 1-1v-3.3c.9-.6 1.6-1.4 2-2.4H21v-3h-1.4c-.2-.5-.4-.9-.6-1.3M10 7.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Guardar dinheiro
+          </button>
+          <button class="btn btn--primary" id="openAdd" type="button">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Adicionar item
+          </button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <article class="kpi kpi--income">
+          <div class="kpi__head">
+            <span class="kpi__label">Saldo do mês</span>
+            <div class="kpi__actions">
+              <button class="kpi__action" id="openIncome" type="button">+ Entrada</button>
+              <button class="kpi__action kpi__action--icon" id="editBalance" type="button" aria-label="Editar saldo" title="Editar saldo"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+            </div>
+          </div>
+          <strong class="kpi__value" id="kpiSaldo">—</strong>
+          <small class="kpi__hint" id="kpiSaldoHint">Valor disponível para gastar</small>
+        </article>
+
+        <article class="kpi kpi--expense">
+          <span class="kpi__label">Total gasto</span>
+          <strong class="kpi__value" id="kpiGasto">R$ 0,00</strong>
+          <small class="kpi__hint" id="kpiItens">0 lançamentos</small>
+        </article>
+
+        <article class="kpi kpi--save">
+          <div class="kpi__head">
+            <span class="kpi__label">Guardado no mês</span>
+            <button class="kpi__action" id="openRescue" type="button">Resgatar</button>
+          </div>
+          <strong class="kpi__value" id="kpiGuardado">R$ 0,00</strong>
+          <small class="kpi__hint" id="kpiAcumulado">Total acumulado: R$ 0,00</small>
+        </article>
+
+        <article class="kpi">
+          <span class="kpi__label">Saldo restante</span>
+          <strong class="kpi__value" id="kpiRestante">—</strong>
+          <div class="progress" aria-hidden="true"><div class="progress__bar" id="progressBar"></div></div>
+          <small class="kpi__hint" id="kpiPct">Defina um saldo para acompanhar</small>
+        </article>
+      </div>
+
+      <div class="grid">
+        <article class="card">
+          <header class="card__head">
+            <h2>Gastos por categoria</h2>
+          </header>
+          <div class="chart-wrap">
+            <canvas id="pieChart" aria-label="Gráfico de gastos por categoria" role="img"></canvas>
+            <div class="chart-center" id="chartCenter">
+              <span>Total</span>
+              <strong id="chartTotal">R$ 0,00</strong>
+            </div>
+            <div class="chart-empty" id="chartEmpty">
+              <div class="chart-empty__ring"></div>
+              <p>Nenhum gasto ainda</p>
+            </div>
+          </div>
+          <ul class="legend" id="legend"></ul>
+        </article>
+
+        <article class="card">
+          <header class="card__head">
+            <h2>Lançamentos</h2>
+            <div class="select">
+              <select id="filterCat" aria-label="Filtrar lançamentos"></select>
+            </div>
+          </header>
+          <ul class="list" id="list"></ul>
+          <div class="empty" id="listEmpty" hidden></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ RESUMO ============ -->
+    <section id="view-resumo" class="view">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Resumo</p>
+          <h1 id="resumoTitulo">Resumo do mês</h1>
+        </div>
+        <button class="btn btn--ghost" id="printResumo" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          Imprimir
+        </button>
+      </div>
+
+      <article class="card hero">
+        <div class="hero__top">
+          <span class="status" id="resumoStatus" data-nivel="ok">No controle</span>
+          <span class="hero__period" id="resumoPeriodo"></span>
+        </div>
+        <p class="hero__statement" id="resumoFrase"></p>
+        <ul class="insights" id="resumoInsights"></ul>
+      </article>
+
+      <div class="stats" id="resumoStats"></div>
+
+      <div class="grid grid--even">
+        <article class="card">
+          <header class="card__head"><h2>Por categoria</h2></header>
+          <div class="breakdown" id="resumoCategorias"></div>
+        </article>
+        <article class="card">
+          <header class="card__head"><h2>Maiores gastos</h2></header>
+          <ol class="ranking" id="resumoTop"></ol>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ HISTÓRICO ============ -->
+    <section id="view-historico" class="view">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Comparar meses</p>
+          <h1 id="histTitulo">Histórico</h1>
+        </div>
+        <div class="segmented segmented--inline" role="radiogroup" aria-label="Período">
+          <input type="radio" name="periodo" id="per-6" value="6" checked>
+          <label for="per-6">6 meses</label>
+          <input type="radio" name="periodo" id="per-12" value="12">
+          <label for="per-12">12 meses</label>
+        </div>
+      </div>
+
+      <div class="stats" id="histStats"></div>
+
+      <article class="card">
+        <header class="card__head">
+          <h2>Gastos por mês</h2>
+          <span class="card__note">Barras: gastos por categoria · Linha: valor disponível</span>
+        </header>
+        <div class="bar-wrap">
+          <canvas id="historyChart" role="img" aria-label="Gráfico de gastos por mês e categoria"></canvas>
+          <div class="chart-empty" id="historyEmpty" hidden><p>Ainda não há dados no período</p></div>
+        </div>
+        <ul class="legend-inline" id="historyLegend"></ul>
+      </article>
+
+      <article class="card card--table">
+        <header class="card__head">
+          <h2>Mês a mês</h2>
+          <span class="card__note">Clique em um mês para abri-lo no Dashboard</span>
+        </header>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Mês</th>
+                <th class="num">Disponível</th>
+                <th class="num">Gastos</th>
+                <th class="num">Guardado</th>
+                <th class="num">Sobra</th>
+                <th class="num">Gastos vs. mês anterior</th>
+              </tr>
+            </thead>
+            <tbody id="histTable"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ METAS ============ -->
+    <section id="view-metas" class="view">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Metas de economia</p>
+          <h1>Para onde vai o que você guarda</h1>
+        </div>
+        <button class="btn btn--primary" id="openGoal" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Nova meta
+        </button>
+      </div>
+
+      <p class="goals-summary" id="metasResumo"></p>
+      <div class="goals" id="metasLista"></div>
+      <div class="card empty" id="metasVazio" hidden>
+        <strong>Nenhuma meta criada</strong>
+        Crie uma meta (ex.: Viagem, Reserva de emergência) e escolha-a ao guardar dinheiro para acompanhar o progresso.
+        <button class="btn btn--ghost" type="button" data-action="goal">Criar primeira meta</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <span>Seus dados ficam salvos apenas neste navegador. <button class="link" type="button" data-action="backup">Fazer backup</button></span>
+  </footer>
+
+  <!-- ============ MODAL: SALDO ============ -->
+  <dialog class="dialog" id="balanceDialog">
+    <form id="balanceForm" method="dialog" novalidate>
+      <header class="dialog__head">
+        <div>
+          <p class="eyebrow" id="balanceEyebrow">Bem-vindo</p>
+          <h3 id="balanceTitle">Qual é o seu saldo do mês?</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+      <p class="dialog__text">Informe quanto você tem disponível para este mês. Cada gasto adicionado será descontado deste valor.</p>
+      <label class="field">
+        <span>Saldo</span>
+        <div class="input-money">
+          <span>R$</span>
+          <input id="balanceInput" inputmode="decimal" placeholder="0,00" autocomplete="off">
+        </div>
+      </label>
+      <p class="form-error" id="balanceErro" hidden></p>
+      <footer class="dialog__foot">
+        <button class="btn btn--ghost" type="button" data-close>Agora não</button>
+        <button class="btn btn--primary" type="submit">Salvar saldo</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============ MODAL: ITEM ============ -->
+  <dialog class="dialog" id="itemDialog">
+    <form id="itemForm" method="dialog" novalidate>
+      <header class="dialog__head">
+        <div>
+          <p class="eyebrow" id="itemEyebrow">Novo gasto</p>
+          <h3 id="itemTitle">Adicionar item</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <label class="field">
+        <span>Nome</span>
+        <input id="itemNome" placeholder="Ex.: Mercado, Netflix, Cinema" maxlength="60" autocomplete="off">
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Valor</span>
+          <div class="input-money">
+            <span>R$</span>
+            <input id="itemValor" inputmode="decimal" placeholder="0,00" autocomplete="off">
+          </div>
+        </label>
+        <label class="field">
+          <span>Data</span>
+          <input id="itemData" type="date">
+        </label>
+      </div>
+
+      <fieldset class="field">
+        <legend>Categoria</legend>
+        <div class="cat-picker" id="catPicker"></div>
+      </fieldset>
+
+      <p class="form-error" id="itemErro" hidden></p>
+
+      <footer class="dialog__foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit" id="itemSubmit">Adicionar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============ MODAL: ENTRADA EXTRA ============ -->
+  <dialog class="dialog" id="incomeDialog">
+    <form id="incomeForm" method="dialog" novalidate>
+      <header class="dialog__head">
+        <div>
+          <p class="eyebrow" id="incomeEyebrow">Entrada extra</p>
+          <h3 id="incomeTitle">Adicionar entrada</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+      <p class="dialog__text">Dinheiro que entrou além do saldo do mês — um freela, reembolso, venda ou presente. Ele soma ao valor disponível.</p>
+
+      <label class="field">
+        <span>Descrição</span>
+        <input id="incomeNome" placeholder="Ex.: Freela, Reembolso, Venda" maxlength="60" autocomplete="off">
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Valor</span>
+          <div class="input-money">
+            <span>R$</span>
+            <input id="incomeValor" inputmode="decimal" placeholder="0,00" autocomplete="off">
+          </div>
+        </label>
+        <label class="field">
+          <span>Data</span>
+          <input id="incomeData" type="date">
+        </label>
+      </div>
+
+      <p class="form-error" id="incomeErro" hidden></p>
+
+      <footer class="dialog__foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit" id="incomeSubmit">Adicionar entrada</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============ MODAL: GUARDAR / RESGATAR ============ -->
+  <dialog class="dialog" id="saveDialog">
+    <form id="saveForm" method="dialog" novalidate>
+      <header class="dialog__head">
+        <div>
+          <p class="eyebrow" id="saveEyebrow">Dinheiro guardado</p>
+          <h3 id="saveTitle">Guardar dinheiro</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <div class="segmented" role="radiogroup" aria-label="Operação">
+        <input type="radio" name="operacao" id="op-guardar" value="guardar" checked>
+        <label for="op-guardar">Guardar</label>
+        <input type="radio" name="operacao" id="op-resgatar" value="resgatar">
+        <label for="op-resgatar">Resgatar</label>
+      </div>
+
+      <p class="dialog__text" id="saveText">O valor guardado sai do saldo disponível do mês, mas não entra como gasto no gráfico.</p>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Valor</span>
+          <div class="input-money">
+            <span>R$</span>
+            <input id="saveValor" inputmode="decimal" placeholder="0,00" autocomplete="off">
+          </div>
+        </label>
+        <label class="field">
+          <span>Data</span>
+          <input id="saveData" type="date">
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Meta <em class="field__opt">(opcional)</em></span>
+        <div class="select select--field">
+          <select id="saveMeta"></select>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Descrição <em class="field__opt">(opcional)</em></span>
+        <input id="saveDescricao" placeholder="Ex.: Reserva de emergência, Viagem" maxlength="60" autocomplete="off">
+      </label>
+
+      <p class="form-error" id="saveErro" hidden></p>
+
+      <footer class="dialog__foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit" id="saveSubmit">Guardar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============ MODAL: META ============ -->
+  <dialog class="dialog" id="goalDialog">
+    <form id="goalForm" method="dialog" novalidate>
+      <header class="dialog__head">
+        <div>
+          <p class="eyebrow" id="goalEyebrow">Nova meta</p>
+          <h3 id="goalTitle">Criar meta de economia</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <label class="field">
+        <span>Nome da meta</span>
+        <input id="goalNome" placeholder="Ex.: Viagem, Reserva de emergência, Notebook" maxlength="50" autocomplete="off">
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Valor da meta</span>
+          <div class="input-money">
+            <span>R$</span>
+            <input id="goalAlvo" inputmode="decimal" placeholder="0,00" autocomplete="off">
+          </div>
+        </label>
+        <label class="field">
+          <span>Prazo <em class="field__opt">(opcional)</em></span>
+          <div class="select select--field">
+            <select id="goalPrazo"></select>
+          </div>
+        </label>
+      </div>
+
+      <p class="form-error" id="goalErro" hidden></p>
+
+      <footer class="dialog__foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn--primary" type="submit" id="goalSubmit">Criar meta</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ============ MODAL: BACKUP ============ -->
+  <dialog class="dialog" id="backupDialog">
+    <div class="dialog__body">
+      <header class="dialog__head">
+        <div>
+          <p class="eyebrow">Seus dados</p>
+          <h3>Backup</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <div id="backupMain">
+        <p class="dialog__text">Seus dados ficam guardados só neste navegador. Exporte um arquivo de backup de vez em quando — com ele você restaura tudo se limpar o navegador ou trocar de aparelho.</p>
+        <p class="backup-status" id="backupStatus"></p>
+
+        <div class="backup-actions">
+          <button class="backup-option" id="exportBackup" type="button" autofocus>
+            <span class="backup-option__icon">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span><strong>Exportar backup</strong><small>Baixa um arquivo .json com todos os seus dados</small></span>
+          </button>
+          <button class="backup-option" id="importBackup" type="button">
+            <span class="backup-option__icon">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span><strong>Importar backup</strong><small>Restaura os dados a partir de um arquivo exportado</small></span>
+          </button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+
+      <div id="backupConfirm" hidden>
+        <p class="dialog__text">Confira o arquivo antes de importar:</p>
+        <ul class="backup-summary" id="backupSummary"></ul>
+        <p class="form-error">Os dados atuais deste navegador serão substituídos pelos do arquivo.</p>
+        <footer class="dialog__foot">
+          <button class="btn btn--ghost" type="button" id="cancelImport">Voltar</button>
+          <button class="btn btn--primary" type="button" id="confirmImport">Substituir dados</button>
+        </footer>
+      </div>
+
+      <p class="form-error" id="backupErro" hidden></p>
+    </div>
+  </dialog>
+
+  <!-- Notificação -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <span id="toastMsg"></span>
+    <button type="button" id="toastUndo">Desfazer</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
