@@ -19,6 +19,7 @@
     veiculo:     { nome: 'Veículo' },
     lazer:       { nome: 'Lazer' },
     transporte:  { nome: 'Transporte' },
+    fatura:      { nome: 'Fatura do Cartão' },
   };
 
   const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',

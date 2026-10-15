@@ -26,7 +26,7 @@
 
   /* Categorias */
   /* Paleta validada para daltonismo (ordem: contas, compras, alimentação,
-     assinaturas, online, veículo, lazer, transporte) */
+     assinaturas, online, veículo, lazer, transporte, fatura) */
   --c-contas: #2A78D6;
   --c-compras: #EB6834;
   --c-alimentacao: #1BAF7A;
@@ -35,6 +35,7 @@
   --c-veiculo: #008300;
   --c-lazer: #6250D6;
   --c-transporte: #E34948;
+  --c-fatura: #4A4A48;
   --c-save: #3B6FD8;
 
   /* Cartões coloridos */
@@ -98,6 +99,7 @@
   --c-veiculo: #008300;
   --c-lazer: #9085E9;
   --c-transporte: #E66767;
+  --c-fatura: #C8C7C2;
   --c-save: #6E9BF0;
 
   --income-bg: linear-gradient(135deg, #12211A 0%, #173527 100%);

@@ -9,7 +9,7 @@ Controle financeiro pessoal simples, bonito e privado. Informe o saldo do mês, 
 ## Funcionalidades
 
 - **Saldo do mês e entradas extras** — defina quanto você tem para gastar e some freelas, reembolsos ou vendas que aparecerem no meio do mês.
-- **Gastos por categoria** — Contas Fixas, Compras, Alimentação, Assinaturas, Compras Online, Veículo, Lazer e Transporte, com gráfico de rosca e legenda (cores validadas para daltonismo).
+- **Gastos por categoria** — Contas Fixas, Compras, Alimentação, Assinaturas, Compras Online, Veículo, Lazer, Transporte e Fatura do Cartão, com gráfico de rosca e legenda (cores validadas para daltonismo).
 - **Dinheiro guardado** — registre quanto guardou ou resgatou; o valor sai (ou volta) do saldo disponível sem contar como gasto.
 - **Metas de economia** — crie metas com valor e prazo (ex.: *Viagem, R$ 4.000 até junho*), vincule o que você guarda a elas e veja quanto falta e quanto guardar por mês.
 - **Resumo do mês** — situação do orçamento, projeção até o fim do mês, quanto ainda pode gastar por dia, maiores gastos e dicas automáticas. Pode ser impresso ou salvo em PDF.
