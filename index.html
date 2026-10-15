@@ -48,6 +48,11 @@
             <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
+        <button class="help-btn" id="openHelp" type="button" aria-label="Ajuda: como usar o Finanças" title="Ajuda">
+          <svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>
+          <span class="help-btn__label">Ajuda</span>
+          <span class="help-btn__pulse" id="helpPulse" hidden></span>
+        </button>
         <button class="icon-btn icon-btn--ring" id="openBackup" type="button" aria-label="Backup dos dados" title="Backup dos dados">
           <svg viewBox="0 0 24 24" width="18" height="18"><ellipse cx="12" cy="6" rx="7" ry="2.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 6v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6M5 12v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
           <span class="badge-dot" id="backupDot" hidden></span>
@@ -261,7 +266,7 @@
   </main>
 
   <footer class="container footer">
-    <span>Seus dados ficam salvos apenas neste navegador. <button class="link" type="button" data-action="backup">Fazer backup</button></span>
+    <span>Seus dados ficam salvos apenas neste navegador. <button class="link" type="button" data-action="backup">Fazer backup</button> · <button class="link" type="button" data-action="help">Ajuda</button></span>
   </footer>
 
   <!-- ============ MODAL: SALDO ============ -->
@@ -277,6 +282,10 @@
         </button>
       </header>
       <p class="dialog__text">Informe quanto você tem disponível para este mês. Cada gasto adicionado será descontado deste valor.</p>
+      <button class="help-hint" type="button" id="welcomeHelp" data-action="help">
+        <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="currentColor"/></svg>
+        Primeira vez aqui? Veja como o Finanças funciona
+      </button>
       <label class="field">
         <span>Saldo</span>
         <div class="input-money">
@@ -525,6 +534,112 @@
       </div>
 
       <p class="form-error" id="backupErro" hidden></p>
+    </div>
+  </dialog>
+
+  <!-- ============ MODAL: AJUDA ============ -->
+  <dialog class="dialog dialog--wide" id="helpDialog">
+    <div class="dialog__body">
+      <header class="dialog__head">
+        <div>
+          <p class="eyebrow">Central de ajuda</p>
+          <h3>Como usar o Finanças</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+      <p class="dialog__text">Escolha um tópico para ver o passo a passo.</p>
+      <div class="faqs" tabindex="-1" autofocus>
+        <details class="faq" id="ajuda-inicio" open>
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Primeiros passos</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <ol class="steps">
+    <li><b>Defina o saldo do mês.</b> Na primeira visita o site pergunta quanto você tem para gastar. Para mudar depois, clique no <b>lápis</b> do cartão verde “Saldo do mês”.</li>
+    <li><b>Registre seus gastos</b> sempre que pagar algo, com o botão <b>Adicionar item</b>.</li>
+    <li><b>Acompanhe</b> o saldo restante, o gráfico por categoria e o <b>Resumo</b>.</li>
+  </ol>
+  <p>Cada mês é independente: use as setas <b>‹ ›</b> ao lado do nome do mês, no topo, para navegar entre meses e definir o saldo de cada um.</p>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-gastos">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Adicionar, editar e remover gastos</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <ol class="steps">
+    <li>Clique em <b>Adicionar item</b>.</li>
+    <li>Preencha o <b>nome</b> (ex.: Mercado), o <b>valor</b> (ex.: <code>49,90</code>) e a <b>data</b>.</li>
+    <li>Escolha a <b>categoria</b>: Contas Fixas, Compras, Alimentação, Assinaturas, Compras Online, Veículo, Lazer ou Transporte.</li>
+    <li>Clique em <b>Adicionar</b>. O valor é descontado do saldo na hora.</li>
+  </ol>
+  <p><b>Para editar</b>, clique no lançamento na lista. <b>Para remover</b>, clique no <b>×</b> à direita — se foi sem querer, clique em <b>Desfazer</b> na mensagem que aparece embaixo.</p>
+  <p>Use o filtro acima da lista para ver só uma categoria, só as entradas ou só o dinheiro guardado.</p>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-entradas">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 4v12M6.5 10.5L12 16l5.5-5.5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Entradas extras (freela, reembolso, venda)</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <p>Recebeu um dinheiro além do saldo do mês? Clique em <b>+ Entrada</b> no cartão verde, informe a descrição, o valor e a data.</p>
+  <p>A entrada <b>soma ao valor disponível</b> do mês, e o cartão mostra a conta (ex.: “R$ 4.800 + R$ 600 em entradas extras”).</p>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-guardar">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 10c0-3.3-3.1-6-7-6S5 6.7 5 10c0 1.9 1 3.6 2.6 4.7V18a1 1 0 0 0 1 1h1.6a1 1 0 0 0 1-1v-1h1.6v1a1 1 0 0 0 1 1h1.6a1 1 0 0 0 1-1v-3.3c.9-.6 1.6-1.4 2-2.4H21v-3h-1.4c-.2-.5-.4-.9-.6-1.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Guardar e resgatar dinheiro</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <p><b>Para guardar:</b> clique em <b>Guardar dinheiro</b>, informe o valor e, se quiser, uma descrição e uma meta. O valor sai do saldo disponível, mas <b>não conta como gasto</b> no gráfico.</p>
+  <p><b>Para resgatar:</b> clique em <b>Resgatar</b> no cartão azul (ou escolha “Resgatar” dentro da janela de guardar). O valor volta para o saldo do mês. Não é possível resgatar mais do que você tem guardado.</p>
+  <p>O cartão azul mostra quanto você guardou <b>no mês</b> e o <b>total acumulado</b> de todos os meses.</p>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-metas">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span><span>Metas: como criar e atribuir dinheiro a elas</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <p><b>Criar uma meta:</b> abra a aba <b>Metas</b> → <b>Nova meta</b>. Dê um nome (ex.: Viagem), o valor que quer juntar e, se quiser, um prazo.</p>
+  <p><b>Atribuir dinheiro a uma meta</b> — há dois jeitos:</p>
+  <ol class="steps">
+    <li>Na aba <b>Metas</b>, clique em <b>Guardar para esta meta</b> no cartão da meta.</li>
+    <li>Ou, ao clicar em <b>Guardar dinheiro</b>, escolha a meta no campo <b>Meta</b>.</li>
+  </ol>
+  <p>Já guardou sem escolher meta? Clique no lançamento na lista do Dashboard e selecione a meta para atribuí-lo.</p>
+  <p>Com prazo definido, a meta mostra <b>quanto guardar por mês</b> para chegar lá. Ao excluir uma meta, o dinheiro continua na sua reserva — só deixa de estar vinculado a ela.</p>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-relatorios">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 20V10M12 20V4M19 20v-7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Resumo e Histórico</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <p><b>Resumo:</b> mostra a situação do mês (No controle, Atenção ou Estourado), a projeção até o fim do mês, quanto você ainda pode gastar por dia e os maiores gastos. Use <b>Imprimir</b> para salvar em PDF.</p>
+  <p><b>Histórico:</b> compara os últimos 6 ou 12 meses em um gráfico e uma tabela. Clique em qualquer mês da tabela para abri-lo no Dashboard.</p>
+  <p>Os dois mostram o mês selecionado nas setas do topo.</p>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-backup">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><ellipse cx="12" cy="6" rx="7" ry="2.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 6v12c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6M5 12c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Como fazer o backup dos seus dados</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <p class="callout">Seus dados ficam <b>só neste navegador</b>. Se você limpar os dados de navegação ou trocar de aparelho, eles se perdem — a menos que tenha um backup.</p>
+  <p><b>Exportar (fazer o backup):</b></p>
+  <ol class="steps">
+    <li>Clique no ícone de <b>banco de dados</b> no topo da página (ao lado do botão de tema).</li>
+    <li>Clique em <b>Exportar backup</b>.</li>
+    <li>Um arquivo <code>financas-backup-AAAA-MM-DD.json</code> será baixado. Guarde-o em um lugar seguro (Google Drive, e-mail, pen drive).</li>
+  </ol>
+  <p><b>Importar (restaurar ou levar para outro aparelho):</b></p>
+  <ol class="steps">
+    <li>No outro aparelho ou navegador, abra o Finanças e clique no ícone de <b>banco de dados</b>.</li>
+    <li>Clique em <b>Importar backup</b> e escolha o arquivo <code>.json</code>.</li>
+    <li>Confira o resumo e clique em <b>Substituir dados</b>.</li>
+  </ol>
+  <p>Faça backup pelo menos uma vez por mês. Um <b>ponto amarelo</b> aparece no ícone quando faz mais de 30 dias desde o último.</p>
+  <button class="btn btn--save help-cta" type="button" data-action="backup">Fazer backup agora</button>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-privacidade">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Privacidade e aparência</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <p>O Finanças não tem cadastro nem servidor: <b>nada do que você digita sai do seu navegador</b>. Por isso os dados não sincronizam entre aparelhos — use o backup para levá-los.</p>
+  <p><b>Modo escuro:</b> clique no ícone de <b>lua</b> no topo. O site lembra a sua escolha; se você nunca escolher, ele segue o tema do sistema.</p>
+  <p>Para usar no celular como um app, abra o site no navegador e escolha <b>Adicionar à tela inicial</b>.</p>
+          </div>
+        </details>
+      </div>
     </div>
   </dialog>
 

@@ -26,7 +26,7 @@
 
   /* Categorias */
   /* Paleta validada para daltonismo (ordem: contas, compras, alimentação,
-     assinaturas, online, veículo, lazer) */
+     assinaturas, online, veículo, lazer, transporte) */
   --c-contas: #2A78D6;
   --c-compras: #EB6834;
   --c-alimentacao: #1BAF7A;
@@ -34,6 +34,7 @@
   --c-online: #E87BA4;
   --c-veiculo: #008300;
   --c-lazer: #6250D6;
+  --c-transporte: #E34948;
   --c-save: #3B6FD8;
 
   /* Cartões coloridos */
@@ -53,6 +54,9 @@
   --save-sub: #5B7DB8;
   --save-btn: #EAF1FE;
   --save-btn-hover: #DCE7FD;
+
+  --help-bg: #2A78D6;
+  --help-ink: #FFFFFF;
 
   --chip-bg: rgba(255, 255, 255, .7);
   --chip-bg-hover: #FFFFFF;
@@ -93,6 +97,7 @@
   --c-online: #D55181;
   --c-veiculo: #008300;
   --c-lazer: #9085E9;
+  --c-transporte: #E66767;
   --c-save: #6E9BF0;
 
   --income-bg: linear-gradient(135deg, #12211A 0%, #173527 100%);
@@ -111,6 +116,9 @@
   --save-sub: #7891BF;
   --save-btn: #18243A;
   --save-btn-hover: #1F2F4C;
+
+  --help-bg: #3987E5;
+  --help-ink: #FFFFFF;
 
   --chip-bg: rgba(255, 255, 255, .08);
   --chip-bg-hover: rgba(255, 255, 255, .16);
@@ -893,6 +901,152 @@ fieldset.field > legend { margin-bottom: 8px; }
 .link { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; font-size: inherit; }
 .link:hover { color: var(--ink); }
 
+/* ---------- Ajuda ---------- */
+.help-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  background: var(--help-bg);
+  color: var(--help-ink);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 16px -8px var(--help-bg);
+  transition: transform .15s, box-shadow .2s, filter .2s;
+}
+.help-btn:hover { transform: translateY(-1px); filter: brightness(1.06); box-shadow: 0 10px 22px -10px var(--help-bg); }
+.help-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.help-btn__pulse {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.help-btn__pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--warn);
+  animation: pulse 1.8s ease-out infinite;
+}
+@keyframes pulse {
+  from { transform: scale(1); opacity: .7; }
+  to { transform: scale(2.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .help-btn__pulse::after { animation: none; }
+}
+
+.help-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin-top: -6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--save-btn);
+  color: var(--save-ink);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .2s;
+}
+.help-hint:hover { background: var(--save-btn-hover); }
+
+.dialog--wide { width: min(680px, calc(100% - 32px)); max-height: min(86vh, 860px); }
+.dialog--wide .dialog__body { max-height: inherit; }
+
+.faqs { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 0; margin: 0 -6px; padding: 0 6px 4px; }
+
+.faqs:focus { outline: none; }
+.faq {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  transition: border-color .2s, background .2s;
+}
+.faq[open] { border-color: var(--line-strong); background: var(--surface-2); }
+.faq summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: 14px;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary span:not(.faq__icon) { flex: 1; }
+.faq summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.faq__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  background: var(--save-btn);
+  color: var(--save-ink);
+}
+.faq__chevron { color: var(--muted); transition: transform .2s; flex: none; }
+.faq[open] .faq__chevron { transform: rotate(180deg); }
+
+.faq__body {
+  display: grid;
+  gap: 10px;
+  padding: 2px 16px 16px 60px;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.faq__body b { color: var(--ink); font-weight: 600; }
+.faq__body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--line-2);
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.steps { list-style: none; counter-reset: passo; display: grid; gap: 8px; }
+.steps li { position: relative; padding-left: 32px; counter-increment: passo; }
+.steps li::before {
+  content: counter(passo);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.callout {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--warn) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, var(--surface));
+  color: var(--ink);
+}
+.help-cta { justify-self: start; height: 40px; margin-top: 4px; }
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
@@ -947,6 +1101,9 @@ fieldset.field > legend { margin-bottom: 8px; }
 @media (max-width: 720px) {
   .container { padding: 0 16px; }
   .topbar__right { gap: 4px; }
+  .help-btn { width: 36px; padding: 0; justify-content: center; }
+  .help-btn__label { display: none; }
+  .faq__body { padding-left: 16px; }
   .month-picker__label { min-width: 104px; }
   .tabs { justify-self: stretch; }
   .tab { flex: 1; padding: 7px 8px; }

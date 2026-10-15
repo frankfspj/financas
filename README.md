@@ -9,12 +9,13 @@ Controle financeiro pessoal simples, bonito e privado. Informe o saldo do mês, 
 ## Funcionalidades
 
 - **Saldo do mês e entradas extras** — defina quanto você tem para gastar e some freelas, reembolsos ou vendas que aparecerem no meio do mês.
-- **Gastos por categoria** — Contas Fixas, Compras, Alimentação, Assinaturas, Compras Online, Veículo e Lazer, com gráfico de rosca e legenda.
+- **Gastos por categoria** — Contas Fixas, Compras, Alimentação, Assinaturas, Compras Online, Veículo, Lazer e Transporte, com gráfico de rosca e legenda (cores validadas para daltonismo).
 - **Dinheiro guardado** — registre quanto guardou ou resgatou; o valor sai (ou volta) do saldo disponível sem contar como gasto.
 - **Metas de economia** — crie metas com valor e prazo (ex.: *Viagem, R$ 4.000 até junho*), vincule o que você guarda a elas e veja quanto falta e quanto guardar por mês.
 - **Resumo do mês** — situação do orçamento, projeção até o fim do mês, quanto ainda pode gastar por dia, maiores gastos e dicas automáticas. Pode ser impresso ou salvo em PDF.
 - **Histórico** — compare os últimos 6 ou 12 meses em um gráfico de barras por categoria e em uma tabela mês a mês.
 - **Backup** — exporte todos os seus dados em um arquivo `.json` e importe de volta quando precisar.
+- **Central de ajuda** — botão **Ajuda** no topo com o passo a passo de cada função: como começar, atribuir dinheiro a metas, fazer backup e mais.
 - **Modo escuro** — segue o tema do sistema ou a sua escolha.
 - **Responsivo** — funciona no computador e no celular.
 
@@ -26,7 +27,7 @@ Controle financeiro pessoal simples, bonito e privado. Informe o saldo do mês, 
 
 ### Pelo navegador (recomendado)
 
-Acesse **https://frankfspj.github.io/financas/** — não precisa instalar nada.
+Acesse **https://frankfspj.github.io/financas/** — não precisa instalar nada. Na dúvida, clique em **Ajuda** no topo da página.
 
 ### Localmente
 

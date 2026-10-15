@@ -6,6 +6,7 @@
   // =========================================================
   const STORAGE_KEY = 'financas.v1';
   const TEMA_KEY = 'financas.tema';
+  const AJUDA_KEY = 'financas.ajudaVista';
 
   // A ordem define a cor de cada categoria (--c-<chave> no CSS). A paleta foi
   // validada nesta ordem para daltonismo — não reordene sem revalidar.
@@ -17,6 +18,7 @@
     online:      { nome: 'Compras Online' },
     veiculo:     { nome: 'Veículo' },
     lazer:       { nome: 'Lazer' },
+    transporte:  { nome: 'Transporte' },
   };
 
   const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -1213,6 +1215,31 @@
   }
 
   // =========================================================
+  // Ajuda
+  // =========================================================
+  function ajudaJaVista() {
+    try { return localStorage.getItem(AJUDA_KEY) === '1'; } catch { return false; }
+  }
+
+  function abrirAjuda(topico = null) {
+    fecharDialogos();
+    if (topico) {
+      $$('#helpDialog .faq').forEach((d) => { d.open = d.id === `ajuda-${topico}`; });
+    }
+    $('#helpDialog').showModal();
+    const aberto = topico && $(`#ajuda-${topico}`);
+    if (aberto) aberto.scrollIntoView({ block: 'nearest' });
+
+    // Some o destaque pulsante depois da primeira visita à ajuda
+    try { localStorage.setItem(AJUDA_KEY, '1'); } catch { /* sem armazenamento */ }
+    $('#helpPulse').hidden = true;
+  }
+
+  function fecharDialogos() {
+    $$('dialog[open]').forEach((d) => d.close());
+  }
+
+  // =========================================================
   // Tema claro / escuro
   // =========================================================
   function temaSalvo() {
@@ -1360,12 +1387,24 @@
     $('#cancelImport').addEventListener('click', abrirBackupInicio);
     $('#confirmImport').addEventListener('click', confirmarImportacao);
 
-    // Ações em estados vazios e rodapé
+    // Ajuda
+    $('#openHelp').addEventListener('click', () => abrirAjuda());
+    // Só um tópico aberto por vez
+    $$('#helpDialog .faq').forEach((d) => d.addEventListener('toggle', () => {
+      if (d.open) $$('#helpDialog .faq').forEach((o) => { if (o !== d) o.open = false; });
+    }));
+
+    // Ações em estados vazios, rodapé e dentro da ajuda
     document.addEventListener('click', (e) => {
       const acao = e.target.closest('[data-action]')?.dataset.action;
+      if (!acao) return;
       if (acao === 'add') abrirItem();
       else if (acao === 'goal') abrirMeta();
-      else if (acao === 'backup') abrirBackup();
+      else if (acao === 'help') abrirAjuda('inicio');
+      else if (acao === 'backup') {
+        fecharDialogos();
+        abrirBackup();
+      }
     });
 
     // Fechar modais (botões e clique fora)
@@ -1405,6 +1444,7 @@
   // =========================================================
   montarCategorias();
   ligarEventos();
+  $('#helpPulse').hidden = ajudaJaVista();
   aplicarTema(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
   render();
 
