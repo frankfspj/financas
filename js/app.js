@@ -38,18 +38,21 @@
   const ICONE_EDIT = '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
   const ICONE_COFRE = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 10c0-3.3-3.1-6-7-6S5 6.7 5 10c0 1.9 1 3.6 2.6 4.7V18a1 1 0 0 0 1 1h1.6a1 1 0 0 0 1-1v-1h1.6v1a1 1 0 0 0 1 1h1.6a1 1 0 0 0 1-1v-3.3c.9-.6 1.6-1.4 2-2.4H21v-3h-1.4c-.2-.5-.4-.9-.6-1.3M10 7.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const ICONE_RESGATE = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 19V7M6.5 12.5L12 7l5.5 5.5M5 4h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ICONE_REC = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 8a8 8 0 0 0-14 1M5 16a8 8 0 0 0 14-1M19 3v5h-5M5 21v-5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ICONE_REC_MINI = ICONE_REC.replace(/width="18" height="18"/, 'width="12" height="12"');
   const ICONE_ENTRADA = '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 4v12M6.5 10.5L12 16l5.5-5.5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   // =========================================================
   // Estado e persistência
   // =========================================================
   const state = {
-    data: normalizar(carregar()) || { meses: {}, metas: [] },
+    data: normalizar(carregar()) || { meses: {}, metas: [], recorrentes: [] },
     mes: chaveMes(new Date()),
     view: 'dashboard',
     filtro: 'todas',
     periodo: 6,
     editandoId: null,
+    editandoRec: null,
     operacao: 'guardar',
     importPendente: null,
   };
@@ -99,7 +102,14 @@
       ? bruto.metas.filter((g) => g && typeof g.nome === 'string' && Number.isFinite(g.alvo) && g.alvo > 0)
       : [];
 
-    return { ...bruto, meses, metas };
+    const recorrentes = Array.isArray(bruto.recorrentes)
+      ? bruto.recorrentes.filter((r) => r && typeof r.id === 'string' && typeof r.nome === 'string'
+        && Number.isFinite(r.valor) && r.valor > 0 && Number.isInteger(r.dia) && r.dia >= 1 && r.dia <= 31
+        && typeof r.inicio === 'string' && /^\d{4}-\d{2}$/.test(r.inicio))
+        .map((r) => ({ ...r, ultimoMes: /^\d{4}-\d{2}$/.test(r.ultimoMes) ? r.ultimoMes : null }))
+      : [];
+
+    return { ...bruto, meses, metas, recorrentes };
   }
 
   // Mês (somente leitura)
@@ -138,6 +148,52 @@
   // Quanto já foi guardado (líquido) para uma meta
   function progressoMeta(id) {
     return todosGuardados().filter((g) => g.metaId === id).reduce((s, g) => s + valorReserva(g), 0);
+  }
+
+  // =========================================================
+  // Gastos recorrentes
+  // =========================================================
+  // Cada recorrente gera um lançamento comum (com recorrenteId) por mês, do mês
+  // de início até o mês atual. `ultimoMes` marca até onde já foi lançado, então
+  // apagar o lançamento de um mês não faz ele voltar.
+  const recorrente = (id) => state.data.recorrentes.find((r) => r.id === id);
+
+  // Dia 31 vira o último dia em meses mais curtos
+  function dataRecorrente(dia, chave) {
+    return `${chave}-${String(Math.min(dia, diasNoMes(chave))).padStart(2, '0')}`;
+  }
+
+  function lancarRecorrente(r, chave) {
+    mesEditavel(chave).itens.push({
+      id: novoId(), nome: r.nome, valor: r.valor, data: dataRecorrente(r.dia, chave),
+      categoria: r.categoria, recorrenteId: r.id, criadoEm: Date.now(),
+    });
+  }
+
+  function gerarRecorrentes() {
+    const atual = chaveMes(new Date());
+    let gerou = false;
+    state.data.recorrentes.forEach((r) => {
+      let chave = r.ultimoMes ? deslocarMes(r.ultimoMes, 1) : r.inicio;
+      while (chave <= atual) {
+        lancarRecorrente(r, chave);
+        r.ultimoMes = chave;
+        chave = deslocarMes(chave, 1);
+        gerou = true;
+      }
+    });
+    return gerou;
+  }
+
+  // Aplica a edição de um recorrente aos lançamentos do mês atual em diante
+  function atualizarLancamentosRecorrente(r) {
+    const atual = chaveMes(new Date());
+    Object.entries(state.data.meses).forEach(([chave, m]) => {
+      if (chave < atual) return;
+      (m.itens || []).filter((i) => i.recorrenteId === r.id).forEach((i) => {
+        Object.assign(i, { nome: r.nome, valor: r.valor, categoria: r.categoria, data: dataRecorrente(r.dia, chave) });
+      });
+    });
   }
 
   // =========================================================
@@ -285,12 +341,14 @@
   // Renderização
   // =========================================================
   function render() {
+    if (gerarRecorrentes()) salvar();
     $('#monthLabel').textContent = nomeMes(state.mes);
     const m = mes();
     const c = calcular(m);
     renderKpis(m, c);
     renderGrafico(c);
     renderLista(m);
+    renderRecorrentes();
     renderResumo(m, c);
     renderHistorico();
     renderMetas();
@@ -431,6 +489,7 @@
         if (filtro === 'todas') return true;
         if (filtro === 'guardado') return l.tipo === 'guardados';
         if (filtro === 'entradas') return l.tipo === 'entradas';
+        if (filtro === 'recorrentes') return Boolean(l.recorrenteId);
         return l.categoria === filtro;
       })
       .sort((a, b) => b.data.localeCompare(a.data) || b.criadoEm - a.criadoEm);
@@ -459,7 +518,8 @@
       return linhaLancamento({
         id: l.id, tipo: 'itens', icone: escapeHtml(l.nome.charAt(0).toUpperCase()),
         cor: conhecida ? corVar(l.categoria) : 'var(--muted)',
-        nome: l.nome, sub: `${conhecida ? conhecida.nome : '—'} · ${dataCurta(l.data)}`,
+        nome: l.nome,
+        sub: `${conhecida ? conhecida.nome : '—'} · ${dataCurta(l.data)}${recorrente(l.recorrenteId) ? ` · <span class="item__rec">${ICONE_REC_MINI} Recorrente</span>` : ''}`,
         valor: `− ${fmt(l.valor)}`,
       });
     }).join('');
@@ -471,6 +531,22 @@
       ? '<strong>Nada por aqui</strong>Nenhum lançamento neste filtro.'
       : `<strong>Nenhum gasto registrado</strong>Adicione seu primeiro item para começar a acompanhar.
          <button class="btn btn--ghost" type="button" data-action="add">Adicionar item</button>`;
+  }
+
+  function renderRecorrentes() {
+    const recs = [...state.data.recorrentes].sort((a, b) => a.dia - b.dia || a.nome.localeCompare(b.nome));
+    $('#recList').innerHTML = recs.map((r) => {
+      const cat = CATEGORIAS[r.categoria];
+      return linhaLancamento({
+        id: r.id, tipo: 'recorrentes', icone: ICONE_REC, cor: cat ? corVar(r.categoria) : 'var(--muted)',
+        nome: r.nome, sub: `${cat ? cat.nome : '—'} · renova todo dia ${r.dia}${r.dia > 28 ? ' (ou no último dia do mês)' : ''}`,
+        valor: `${fmt(r.valor)}/mês`,
+      });
+    }).join('');
+    $('#recEmpty').hidden = recs.length > 0;
+    $('#recNota').textContent = recs.length
+      ? `${fmt(recs.reduce((s, r) => s + r.valor, 0))} por mês, lançados sozinhos`
+      : 'Lançados sozinhos todo mês';
   }
 
   function renderResumo(m, c) {
@@ -545,6 +621,11 @@
       }
       if (c.resgatado > 0) partes.push(`resgatou <b>${fmt(c.resgatado)}</b>`);
       insights.push(`Neste mês você ${partes.join(' e ')}. Sua reserva total está em <b>${fmt(totalAcumulado())}</b>.`);
+    }
+    const fixos = m.itens.filter((i) => i.recorrenteId);
+    if (fixos.length) {
+      const somaFixos = fixos.reduce((s, i) => s + i.valor, 0);
+      insights.push(`Gastos recorrentes somam <b>${fmt(somaFixos)}</b> neste mês (${plural(fixos.length, 'conta', 'contas')})${c.disponivel > 0 ? ` — ${pct(somaFixos / c.disponivel)} do saldo` : ''}.`);
     }
     if (c.porCat.assinaturas > 0) {
       insights.push(`Assinaturas somam <b>${fmt(c.porCat.assinaturas)}</b> — vale revisar as que você não usa.`);
@@ -919,27 +1000,83 @@
       + '<optgroup label="Gastos por categoria">'
       + Object.entries(CATEGORIAS).map(([k, c]) => `<option value="${k}">${c.nome}</option>`).join('')
       + '</optgroup><optgroup label="Outros">'
+      + '<option value="recorrentes">Gastos recorrentes</option>'
       + '<option value="entradas">Entradas extras</option>'
       + '<option value="guardado">Guardado e resgates</option>'
       + '</optgroup>';
+
+    $('#itemDia').innerHTML = Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}">Todo dia ${i + 1}</option>`).join('');
   }
 
-  function abrirItem(id = null) {
+  // Três modos: novo gasto (com opção de repetir), editar um lançamento,
+  // e editar um gasto recorrente (state.editandoRec).
+  function abrirItem(id = null, repetir = false) {
     const item = id ? mes().itens.find((i) => i.id === id) : null;
     state.editandoId = item ? item.id : null;
+    state.editandoRec = null;
 
     prepararData($('#itemData'), item?.data);
     $('#itemEyebrow').textContent = item ? 'Editar gasto' : `Novo gasto · ${nomeMes(state.mes)}`;
-    $('#itemTitle').textContent = item ? item.nome : 'Adicionar item';
+    $('#itemTitle').textContent = item ? item.nome : (repetir ? 'Novo gasto recorrente' : 'Adicionar item');
     $('#itemSubmit').textContent = item ? 'Salvar alterações' : 'Adicionar';
-    $('#itemNome').value = item ? item.nome : '';
-    $('#itemValor').value = item ? valorParaInput(item.valor) : '';
-    const cat = item && CATEGORIAS[item.categoria] ? item.categoria : Object.keys(CATEGORIAS)[0];
-    $(`#cat-${cat}`).checked = true;
-    $('#itemErro').hidden = true;
+    preencherItem(item);
+
+    $('#itemRecorrenteWrap').hidden = Boolean(item);
+    $('#itemRecorrente').checked = !item && repetir;
+    const origem = item && recorrente(item.recorrenteId);
+    $('#itemRecorrenteNota').hidden = !origem;
+    $('#itemRecorrenteNota').textContent = origem
+      ? 'Este lançamento vem de um gasto recorrente: a alteração vale só para este mês. Para mudar os próximos meses, edite no cartão “Gastos recorrentes”.'
+      : '';
+    modoData(false);
 
     $('#itemDialog').showModal();
     $('#itemNome').focus();
+  }
+
+  function abrirRecorrente(id) {
+    const r = recorrente(id);
+    if (!r) return;
+    state.editandoId = null;
+    state.editandoRec = r.id;
+
+    $('#itemEyebrow').textContent = 'Gasto recorrente';
+    $('#itemTitle').textContent = r.nome;
+    $('#itemSubmit').textContent = 'Salvar alterações';
+    preencherItem(r);
+    $('#itemDia').value = String(r.dia);
+    $('#itemRecorrenteWrap').hidden = true;
+    $('#itemRecorrenteNota').hidden = false;
+    $('#itemRecorrenteNota').textContent = `As alterações valem para ${nomeMesExtenso(chaveMes(new Date()))} e os meses seguintes. Meses anteriores não mudam.`;
+    modoData(true);
+
+    $('#itemDialog').showModal();
+    $('#itemNome').focus();
+  }
+
+  function preencherItem(x) {
+    $('#itemNome').value = x ? x.nome : '';
+    $('#itemValor').value = x ? valorParaInput(x.valor) : '';
+    const cat = x && CATEGORIAS[x.categoria] ? x.categoria : Object.keys(CATEGORIAS)[0];
+    $(`#cat-${cat}`).checked = true;
+    $('#itemErro').hidden = true;
+  }
+
+  // Data do lançamento (date) ou dia da renovação (select) no modo recorrente
+  function modoData(recorrenteEmEdicao) {
+    $('#itemData').hidden = recorrenteEmEdicao;
+    $('#itemDiaWrap').hidden = !recorrenteEmEdicao;
+    atualizarDicaRecorrente();
+  }
+
+  function atualizarDicaRecorrente() {
+    const editandoRec = Boolean(state.editandoRec);
+    const marcado = $('#itemRecorrente').checked && !$('#itemRecorrenteWrap').hidden;
+    const dia = Number($('#itemData').value.slice(8));
+    $('#itemDataLabel').textContent = editandoRec ? 'Renovação' : (marcado ? 'Data de renovação' : 'Data');
+    $('#itemRecorrenteHint').textContent = marcado && dia
+      ? `Será lançado automaticamente todo dia ${dia}${dia > 28 ? ' (ou no último dia, nos meses mais curtos)' : ''}.`
+      : 'Ideal para aluguel, internet e outras contas de valor fixo.';
   }
 
   function salvarItem(e) {
@@ -948,17 +1085,33 @@
     const valor = parseValor($('#itemValor').value);
     const data = $('#itemData').value;
     const categoria = document.querySelector('input[name="categoria"]:checked')?.value;
+    const rec = state.editandoRec ? recorrente(state.editandoRec) : null;
 
     if (!nome) return mostrarErro('#itemErro', 'Dê um nome ao gasto.');
     if (!Number.isFinite(valor) || valor <= 0) return mostrarErro('#itemErro', 'Informe um valor maior que zero. Ex.: 49,90');
-    if (!data || !data.startsWith(state.mes)) return mostrarErro('#itemErro', `Escolha uma data dentro de ${nomeMes(state.mes)}.`);
+    if (!rec && (!data || !data.startsWith(state.mes))) return mostrarErro('#itemErro', `Escolha uma data dentro de ${nomeMes(state.mes)}.`);
     if (!CATEGORIAS[categoria]) return mostrarErro('#itemErro', 'Escolha uma categoria.');
 
+    if (rec) {
+      Object.assign(rec, { nome, valor, categoria, dia: Number($('#itemDia').value) });
+      atualizarLancamentosRecorrente(rec);
+      salvar();
+      $('#itemDialog').close();
+      render();
+      return mostrarToast('Gasto recorrente atualizado');
+    }
+
     const editando = state.editandoId;
+    const repetir = !editando && $('#itemRecorrente').checked;
     const m = mesEditavel();
     if (editando) {
       const item = m.itens.find((i) => i.id === editando);
       if (item) Object.assign(item, { nome, valor, data, categoria });
+    } else if (repetir) {
+      const dia = Number(data.slice(8));
+      const r = { id: novoId(), nome, valor, categoria, dia, inicio: state.mes, ultimoMes: state.mes, criadoEm: Date.now() };
+      state.data.recorrentes.push(r);
+      m.itens.push({ id: novoId(), nome, valor, data, categoria, recorrenteId: r.id, criadoEm: Date.now() });
     } else {
       m.itens.push({ id: novoId(), nome, valor, data, categoria, criadoEm: Date.now() });
     }
@@ -966,7 +1119,18 @@
     salvar();
     $('#itemDialog').close();
     render();
-    mostrarToast(editando ? 'Item atualizado' : 'Item adicionado');
+    if (repetir) mostrarToast(`Gasto recorrente criado · todo dia ${Number(data.slice(8))}`);
+    else mostrarToast(editando ? 'Item atualizado' : 'Item adicionado');
+  }
+
+  // Para a repetição; os lançamentos já feitos continuam nos meses
+  function removerRecorrente(id) {
+    const idx = state.data.recorrentes.findIndex((r) => r.id === id);
+    if (idx < 0) return;
+    const [r] = state.data.recorrentes.splice(idx, 1);
+    salvar();
+    render();
+    mostrarToast(`“${r.nome}” não vai mais se repetir`, () => state.data.recorrentes.splice(idx, 0, r));
   }
 
   // =========================================================
@@ -1129,7 +1293,7 @@
   }
 
   function temDados() {
-    return contarLancamentos(state.data) > 0 || state.data.metas.length > 0;
+    return contarLancamentos(state.data) > 0 || state.data.metas.length > 0 || state.data.recorrentes.length > 0;
   }
 
   function renderAvisoBackup() {
@@ -1195,6 +1359,7 @@
         `<b>${plural(meses.length, 'mês', 'meses')}</b>${meses.length ? ` (${nomeMes(meses[0])} a ${nomeMes(meses[meses.length - 1])})` : ''}`,
         `<b>${plural(contarLancamentos(dados), 'lançamento', 'lançamentos')}</b>`,
         `<b>${plural(dados.metas.length, 'meta', 'metas')}</b>`,
+        dados.recorrentes.length ? `<b>${plural(dados.recorrentes.length, 'gasto recorrente', 'gastos recorrentes')}</b>` : null,
       ].filter(Boolean);
       $('#backupSummary').innerHTML = itens.map((t) => `<li>${t}</li>`).join('');
       $('#backupErro').hidden = true;
@@ -1323,11 +1488,14 @@
     $('#openSave').addEventListener('click', () => abrirGuardar());
     $('#openRescue').addEventListener('click', () => abrirGuardar(null, 'resgatar'));
     $('#openIncome').addEventListener('click', () => abrirEntrada());
+    $('#openRec').addEventListener('click', () => abrirItem(null, true));
     $('#editBalance').addEventListener('click', () => abrirSaldo());
 
     // Formulários
     $('#balanceForm').addEventListener('submit', salvarSaldo);
     $('#itemForm').addEventListener('submit', salvarItem);
+    $('#itemRecorrente').addEventListener('change', atualizarDicaRecorrente);
+    $('#itemData').addEventListener('input', atualizarDicaRecorrente);
     $('#incomeForm').addEventListener('submit', salvarEntrada);
     $('#saveForm').addEventListener('submit', salvarGuardado);
     $('#goalForm').addEventListener('submit', salvarMeta);
@@ -1348,6 +1516,13 @@
       if (!li) return;
       const abrir = { itens: abrirItem, guardados: abrirGuardar, entradas: abrirEntrada }[li.dataset.tipo];
       abrir(li.dataset.id);
+    });
+
+    $('#recList').addEventListener('click', (e) => {
+      const del = e.target.closest('[data-del]');
+      if (del) return removerRecorrente(del.dataset.del);
+      const li = e.target.closest('.item');
+      if (li) abrirRecorrente(li.dataset.id);
     });
 
     // Histórico
@@ -1413,7 +1588,7 @@
       dlg.addEventListener('click', (e) => {
         if (e.target === dlg || e.target.closest('[data-close]')) dlg.close();
       });
-      dlg.addEventListener('close', () => { state.editandoId = null; });
+      dlg.addEventListener('close', () => { state.editandoId = null; state.editandoRec = null; });
     });
 
     // Segue o tema do sistema enquanto o usuário não escolher um

@@ -141,16 +141,36 @@
           <ul class="legend" id="legend"></ul>
         </article>
 
-        <article class="card">
-          <header class="card__head">
-            <h2>Lançamentos</h2>
-            <div class="select">
-              <select id="filterCat" aria-label="Filtrar lançamentos"></select>
+        <div class="stack">
+          <article class="card">
+            <header class="card__head">
+              <h2>Lançamentos</h2>
+              <div class="select">
+                <select id="filterCat" aria-label="Filtrar lançamentos"></select>
+              </div>
+            </header>
+            <ul class="list" id="list"></ul>
+            <div class="empty" id="listEmpty" hidden></div>
+          </article>
+
+          <article class="card card--rec">
+            <header class="card__head">
+              <div>
+                <h2>Gastos recorrentes</h2>
+                <span class="card__note" id="recNota">Lançados sozinhos todo mês</span>
+              </div>
+              <button class="btn btn--ghost" id="openRec" type="button">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Novo recorrente
+              </button>
+            </header>
+            <ul class="list" id="recList"></ul>
+            <div class="empty" id="recEmpty" hidden>
+              <strong>Nenhum gasto recorrente</strong>
+              Cadastre contas de valor fixo, como aluguel ou internet, e elas entram sozinhas em todo mês.
             </div>
-          </header>
-          <ul class="list" id="list"></ul>
-          <div class="empty" id="listEmpty" hidden></div>
-        </article>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -266,7 +286,7 @@
   </main>
 
   <footer class="container footer">
-    <span>Seus dados ficam salvos apenas neste navegador. <button class="link" type="button" data-action="backup">Fazer backup</button> · <button class="link" type="button" data-action="help">Ajuda</button> · <span class="versao">v1.0.0</span></span>
+    <span>Seus dados ficam salvos apenas neste navegador. <button class="link" type="button" data-action="backup">Fazer backup</button> · <button class="link" type="button" data-action="help">Ajuda</button> · <span class="versao">v1.1.0</span></span>
   </footer>
 
   <!-- ============ MODAL: SALDO ============ -->
@@ -328,8 +348,11 @@
           </div>
         </label>
         <label class="field">
-          <span>Data</span>
+          <span id="itemDataLabel">Data</span>
           <input id="itemData" type="date">
+          <div class="select select--field" id="itemDiaWrap" hidden>
+            <select id="itemDia"></select>
+          </div>
         </label>
       </div>
 
@@ -337,6 +360,15 @@
         <legend>Categoria</legend>
         <div class="cat-picker" id="catPicker"></div>
       </fieldset>
+
+      <label class="check" id="itemRecorrenteWrap">
+        <input type="checkbox" id="itemRecorrente">
+        <span>
+          <strong>Repetir todo mês</strong>
+          <small id="itemRecorrenteHint">Ideal para aluguel, internet e outras contas de valor fixo.</small>
+        </span>
+      </label>
+      <p class="dialog__note" id="itemRecorrenteNota" hidden></p>
 
       <p class="form-error" id="itemErro" hidden></p>
 
@@ -573,6 +605,19 @@
   </ol>
   <p><b>Para editar</b>, clique no lançamento na lista. <b>Para remover</b>, clique no <b>×</b> à direita — se foi sem querer, clique em <b>Desfazer</b> na mensagem que aparece embaixo.</p>
   <p>Use o filtro acima da lista para ver só uma categoria, só as entradas ou só o dinheiro guardado.</p>
+          </div>
+        </details>
+        <details class="faq" id="ajuda-recorrentes">
+          <summary><span class="faq__icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 8a8 8 0 0 0-14 1M5 16a8 8 0 0 0 14-1M19 3v5h-5M5 21v-5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Gastos recorrentes (aluguel, internet)</span><svg class="faq__chevron" viewBox="0 0 24 24" width="18" height="18"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="faq__body">
+  <p>Contas de valor fixo que se repetem todo mês podem ser lançadas <b>automaticamente</b>.</p>
+  <ol class="steps">
+    <li>Clique em <b>Novo recorrente</b> no cartão “Gastos recorrentes” do Dashboard (ou marque <b>Repetir todo mês</b> ao adicionar um item).</li>
+    <li>Informe o nome (ex.: Aluguel), o valor (ex.: <code>700,00</code>), a categoria e o <b>dia da renovação</b>.</li>
+    <li>Pronto: a cada mês novo, o gasto aparece sozinho na lista, na data escolhida.</li>
+  </ol>
+  <p>Para <b>mudar o valor</b> (reajuste do aluguel, por exemplo), clique no gasto no cartão “Gastos recorrentes”: a mudança vale para o mês atual e os próximos. Editar o lançamento na lista muda <b>só aquele mês</b>.</p>
+  <p>Para <b>parar</b> a repetição, clique no <b>×</b> do gasto no cartão “Gastos recorrentes”. Os lançamentos dos meses anteriores continuam registrados.</p>
           </div>
         </details>
         <details class="faq" id="ajuda-entradas">

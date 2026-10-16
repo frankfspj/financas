@@ -385,6 +385,9 @@ h2 { font-size: 15px; font-weight: 600; letter-spacing: -.005em; }
   align-items: start;
 }
 .grid--even { grid-template-columns: 1fr 1fr; }
+.stack { display: grid; gap: 16px; min-width: 0; }
+.card--rec .card__note { display: block; margin-top: 4px; }
+.item__rec { display: inline-flex; align-items: center; gap: 3px; vertical-align: -2px; }
 
 .card {
   background: var(--surface);
@@ -781,6 +784,31 @@ fieldset.field > legend { margin-bottom: 8px; }
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 16%, transparent);
 }
 .cat-option input:focus-visible + label { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* Opção "Repetir todo mês" */
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.check:hover { border-color: var(--line-strong); }
+.check:has(input:checked) { border-color: var(--ink); background: var(--surface-2); }
+.check input { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: var(--ink); cursor: pointer; }
+.check strong { display: block; font-size: 14px; font-weight: 500; }
+.check small { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.dialog__note {
+  font-size: 13px;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  padding: 10px 14px;
+  border-radius: 10px;
+}
 
 .form-error {
   font-size: 13px;
